@@ -1,0 +1,5 @@
+{
+  "name": "London Pulse",
+  "description": "Real-time London transport dashboard using TfL Trackernet APIs.",
+  "requestFramePermissions": []
+}
