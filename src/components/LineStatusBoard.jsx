@@ -5,6 +5,7 @@ import Panel from './ui/Panel';
 import SectionHeader from './ui/SectionHeader';
 import StatePanel from './ui/StatePanel';
 import LoadingState from './ui/LoadingState';
+import { LineSkeleton } from './ui/Skeleton';
 import { getLineColorHex, getStatusPriority, getToneClasses } from '../lib/transport';
 
 function getStatusPresentation(statusId) {
@@ -13,7 +14,7 @@ function getStatusPresentation(statusId) {
   return { icon: CheckCircle2 };
 }
 
-export default function LineStatusBoard() {
+const LineStatusBoard = React.memo(function LineStatusBoard() {
   const { data: lineStatuses, error, loading, lastUpdated } = useLineStatus();
   const [expandedLines, setExpandedLines] = useState(new Set());
 
@@ -37,7 +38,11 @@ export default function LineStatusBoard() {
   };
 
   if (!import.meta.env.VITE_TFL_APP_KEY) return <StatePanel icon={AlertTriangle} tone="danger" title="TfL API key required" message="Add VITE_TFL_APP_KEY to load live line status." />;
-  if (loading && !lineStatuses) return <LoadingState label="Fetching live line status…" />;
+  if (loading && !lineStatuses) return (
+    <div className="space-y-3">
+      {[1, 2, 3, 4, 5].map(i => <LineSkeleton key={i} />)}
+    </div>
+  );
   if (error) return <StatePanel icon={AlertTriangle} tone="danger" title="Unable to load line status" message={error.message} />;
   if (lineStatuses && lineStatuses.length === 0) return <StatePanel title="No line data returned" message="The TfL endpoint responded without any line status entries." />;
 
@@ -99,4 +104,6 @@ export default function LineStatusBoard() {
       </div>
     </div>
   );
-}
+});
+
+export default LineStatusBoard;

@@ -5,12 +5,17 @@ import { useLineStatusIncidents } from '../api/useTrackernet';
 import Panel from './ui/Panel';
 import LoadingState from './ui/LoadingState';
 import StatePanel from './ui/StatePanel';
+import { AlertSkeleton } from './ui/Skeleton';
 import { getLineColorHex } from '../lib/transport';
 
 export default function AlertsBoard() {
   const { data: incidentStatuses, error, loading, lastUpdated } = useLineStatusIncidents();
 
-  if (loading && !incidentStatuses) return <LoadingState label="Scanning for network incidents…" />;
+  if (loading && !incidentStatuses) return (
+    <div className="space-y-3">
+      {[1, 2].map(i => <AlertSkeleton key={i} />)}
+    </div>
+  );
   if (error) return <StatePanel tone="danger" title="Unable to load alerts" message={error.message} />;
   if (incidentStatuses && incidentStatuses.length === 0) {
     return (

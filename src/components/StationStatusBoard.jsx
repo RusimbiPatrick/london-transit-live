@@ -5,11 +5,22 @@ import Panel from './ui/Panel';
 import SectionHeader from './ui/SectionHeader';
 import LoadingState from './ui/LoadingState';
 import StatePanel from './ui/StatePanel';
+import { Skeleton } from './ui/Skeleton';
 
 export default function StationStatusBoard() {
   const { data: stationStatuses, error, loading, lastUpdated } = useStationStatus();
 
-  if (loading && !stationStatuses) return <LoadingState label="Fetching station disruption reports…" />;
+  if (loading && !stationStatuses) return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {[1, 2, 3, 4, 5, 6].map(i => (
+        <div key={i} className="flex flex-col border-l-[6px] border-l-tfl-blue rounded-2xl border border-border-subtle bg-white p-5">
+          <Skeleton className="h-4 w-20 mb-2" />
+          <Skeleton className="h-5 w-32 mb-3" />
+          <Skeleton className="h-4 w-full" />
+        </div>
+      ))}
+    </div>
+  );
   if (error) return <StatePanel tone="danger" title="Unable to load station status" message={error.message} />;
   if (stationStatuses && stationStatuses.length === 0) {
     return (

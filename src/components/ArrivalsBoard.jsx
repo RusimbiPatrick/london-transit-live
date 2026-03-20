@@ -8,6 +8,7 @@ import LinePill from './ui/LinePill';
 import LoadingState from './ui/LoadingState';
 import StatePanel from './ui/StatePanel';
 import SelectField from './ui/SelectField';
+import { ArrivalSkeleton } from './ui/Skeleton';
 
 export default function ArrivalsBoard() {
   const [lineCode, setLineCode] = React.useState('V');
@@ -33,7 +34,7 @@ export default function ArrivalsBoard() {
       </div>
 
       {loading && !predictionGroups ? (
-        <LoadingState label={`Fetching ${selectedLineName} arrivals…`} />
+        <ArrivalSkeleton />
       ) : error ? (
         <StatePanel tone="danger" title="Unable to load arrivals" message={error.message} />
       ) : predictionGroups && predictionGroups.length > 0 ? (
