@@ -1,0 +1,33 @@
+export const TUBE_LINES = [
+  { code: 'B', name: 'Bakerloo' },
+  { code: 'C', name: 'Central' },
+  { code: 'D', name: 'District' },
+  { code: 'H', name: 'Hammersmith & City' },
+  { code: 'J', name: 'Jubilee' },
+  { code: 'M', name: 'Metropolitan' },
+  { code: 'N', name: 'Northern' },
+  { code: 'P', name: 'Piccadilly' },
+  { code: 'V', name: 'Victoria' },
+  { code: 'W', name: 'Waterloo & City' },
+];
+
+export const COMMON_STATIONS = [
+  { code: 'OXC', name: 'Oxford Circus' },
+  { code: 'VIC', name: 'Victoria' },
+  { code: 'KXX', name: "King's Cross St. Pancras" },
+  { code: 'WLO', name: 'Waterloo' },
+  { code: 'LBG', name: 'London Bridge' },
+  { code: 'PAD', name: 'Paddington' },
+  { code: 'BDS', name: 'Bond Street' },
+  { code: 'GPK', name: 'Green Park' },
+  { code: 'LSQ', name: 'Leicester Square' },
+  { code: 'TCR', name: 'Tottenham Court Road' },
+  { code: 'CHX', name: 'Charing Cross' },
+  { code: 'MGT', name: 'Moorgate' },
+  { code: 'BNK', name: 'Bank' },
+  { code: 'SVS', name: 'Seven Sisters' },
+  { code: 'FPK', name: 'Finsbury Park' },
+  { code: 'EUS', name: 'Euston' },
+  { code: 'CWF', name: 'Canary Wharf' },
+  { code: 'STF', name: 'Stratford' },
+];
