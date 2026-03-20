@@ -1,21 +1,37 @@
-const BASE_URL = 'https://api.tfl.gov.uk';
+import { API_CONFIG, TFL_LINE_MAPPINGS, TFL_STATION_MAPPINGS } from '../constants';
+import { LineStatus, StationStatus, Station, Train, Platform, StatusId } from '../types';
+import { getApiConfig } from '../utils/env';
 
-async function fetchJson(endpoint, signal) {
-  const url = new URL(`${BASE_URL}${endpoint}`);
-  const appKey = import.meta.env.VITE_TFL_APP_KEY;
-  if (appKey) {
-    url.searchParams.append('app_key', appKey);
-  }
+const { baseUrl, appKey, timeout } = getApiConfig();
+
+async function fetchJson(endpoint: string, signal?: AbortSignal): Promise<any> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
   
-  const response = await fetch(url.toString(), { signal });
-  if (!response.ok) {
-    throw new Error(`TfL API Error: ${response.status} ${response.statusText}`);
+  try {
+    const url = new URL(`${baseUrl}${endpoint}`);
+    if (appKey) {
+      url.searchParams.append('app_key', appKey);
+    }
+    
+    const response = await fetch(url.toString(), { 
+      signal: signal || controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`TfL API Error: ${response.status} ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } finally {
+    clearTimeout(timeoutId);
   }
-  
-  return await response.json();
 }
 
-function mapSeverityToId(severity) {
+function mapSeverityToId(severity: number): StatusId {
   if (severity === 10) return 'GS';
   if (severity === 9) return 'MD';
   if (severity === 8 || severity === 6) return 'SD';
@@ -24,7 +40,7 @@ function mapSeverityToId(severity) {
   return 'GS'; // Default
 }
 
-export async function getLineStatus(incidentsOnly = false, signal) {
+export async function getLineStatus(incidentsOnly = false, signal?: AbortSignal): Promise<LineStatus[]> {
   const data = await fetchJson('/Line/Mode/tube,dlr,overground,elizabeth-line,tram/Status', signal);
   
   let statuses = data.map(line => {
@@ -48,7 +64,7 @@ export async function getLineStatus(incidentsOnly = false, signal) {
   return statuses;
 }
 
-export async function getStationStatus(incidentsOnly = false, signal) {
+export async function getStationStatus(incidentsOnly = false, signal?: AbortSignal): Promise<StationStatus[]> {
   // The Unified API doesn't have a direct equivalent for StationStatus that matches TrackerNet perfectly.
   // We can use StopPoint/Mode/tube/Disruption
   const data = await fetchJson('/StopPoint/Mode/tube,dlr,overground,elizabeth-line/Disruption', signal);
@@ -69,29 +85,14 @@ export async function getStationStatus(incidentsOnly = false, signal) {
   return statuses;
 }
 
-export async function getPredictionDetailed(lineCode, stationCode, signal) {
+export async function getPredictionDetailed(lineCode: string, stationCode: string, signal?: AbortSignal): Promise<Station[]> {
   // Unified API Arrivals: /Line/{id}/Arrivals/{stopPointId}
   // But we only have lineCode (e.g., 'V') and stationCode (e.g., 'OXC').
   // We need to map these to Unified API IDs.
   // Actually, the user's component uses TUBE_LINES and COMMON_STATIONS.
   // Let's map them.
-  const lineMap = {
-    'B': 'bakerloo', 'C': 'central', 'D': 'district', 'H': 'hammersmith-city',
-    'J': 'jubilee', 'M': 'metropolitan', 'N': 'northern', 'P': 'piccadilly',
-    'V': 'victoria', 'W': 'waterloo-city'
-  };
-  
-  const stationMap = {
-    'OXC': '940GZZLUOXC', 'VIC': '940GZZLUVIC', 'KXX': '940GZZLUKSX',
-    'WLO': '940GZZLUWLO', 'LBG': '940GZZLULNB', 'PAD': '940GZZLUPAC',
-    'BDS': '940GZZLUBND', 'GPK': '940GZZLUGPK', 'LSQ': '940GZZLULSQ',
-    'TCR': '940GZZLUTCR', 'CHX': '940GZZLUCHX', 'MGT': '940GZZLUMGT',
-    'BNK': '940GZZLUBAK', 'SVS': '940GZZLUSVS', 'FPK': '940GZZLUFPK',
-    'EUS': '940GZZLUEUS', 'CWF': '940GZZLUCYF', 'STF': '940GZZLUSTF'
-  };
-
-  const lineId = lineMap[lineCode];
-  const stopPointId = stationMap[stationCode];
+  const lineId = TFL_LINE_MAPPINGS[lineCode as keyof typeof TFL_LINE_MAPPINGS];
+  const stopPointId = TFL_STATION_MAPPINGS[stationCode as keyof typeof TFL_STATION_MAPPINGS];
 
   if (!lineId || !stopPointId) return [];
 
