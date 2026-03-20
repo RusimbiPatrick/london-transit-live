@@ -4,7 +4,7 @@ import {
   getStationStatus,
   getPredictionSummary,
   getPredictionDetailed
-} from './trackernet';
+} from './trackenet';
 
 export function useLineStatus() {
   const { data, error, isLoading, isRefetching, refetch } = useQuery({
